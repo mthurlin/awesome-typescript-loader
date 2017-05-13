@@ -54,7 +54,6 @@ function createChecker(receive, send) {
     var ignoreDiagnostics = {};
     var instanceName;
     var context;
-    var getCustomTransformers;
     function ensureFile(fileName) {
         if (!files[fileName]) {
             var text = compiler.sys.readFile(fileName);
@@ -112,7 +111,6 @@ function createChecker(receive, send) {
     var TS_FILES = /\.tsx?$/i;
     var Host = (function () {
         function Host(filesRegex) {
-            this.getCustomTransformers = getCustomTransformers;
             this.filesRegex = filesRegex;
         }
         Host.prototype.getProjectVersion = function () { return projectVersion.toString(); };
@@ -211,9 +209,6 @@ function createChecker(receive, send) {
         compiler = require(payload.compilerInfo.compilerPath);
         compilerInfo = payload.compilerInfo;
         loaderConfig = payload.loaderConfig;
-        if (loaderConfig.customTranformersPath !== undefined) {
-            getCustomTransformers = require(loaderConfig.customTranformersPath);
-        }
         compilerConfig = payload.compilerConfig;
         compilerOptions = compilerConfig.options;
         webpackOptions = payload.webpackOptions;
@@ -235,6 +230,9 @@ function createChecker(receive, send) {
             };
         });
         var program = service.getProgram();
+        if (loaderConfig.customTranformersPath !== undefined) {
+            host.getCustomTransformers = require(loaderConfig.customTranformersPath)(program);
+        }
         program.getSourceFiles().forEach(function (file) {
             files[file.fileName] = {
                 text: file.text,
