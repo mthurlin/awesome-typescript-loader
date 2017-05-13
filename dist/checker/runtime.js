@@ -230,7 +230,10 @@ function createChecker(receive, send) {
             };
         });
         var program = service.getProgram();
-        if (loaderConfig.customTranformersPath !== undefined) {
+        if (loaderConfig.getCustomTransformers !== undefined) {
+            host.getCustomTransformers = loaderConfig.getCustomTransformers(program);
+        }
+        else if (loaderConfig.customTranformersPath !== undefined) {
             host.getCustomTransformers = require(loaderConfig.customTranformersPath)(program);
         }
         program.getSourceFiles().forEach(function (file) {
