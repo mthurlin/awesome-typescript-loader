@@ -232,11 +232,15 @@ function createChecker(receive, send) {
         });
         var program = service.getProgram();
         if (loaderConfig.getCustomTransformers !== undefined) {
-            transformers = host.getCustomTransformers = loaderConfig.getCustomTransformers(program);
+            transformers = loaderConfig.getCustomTransformers(program);
         }
         else if (loaderConfig.customTranformersPath !== undefined) {
-            transformers = host.getCustomTransformers = require(loaderConfig.customTranformersPath)(program);
+            transformers = require(loaderConfig.customTranformersPath)(program);
         }
+        host.getCustomTransformers = function () {
+            return transformers;  
+        };
+        
         program.getSourceFiles().forEach(function (file) {
             files[file.fileName] = {
                 text: file.text,
