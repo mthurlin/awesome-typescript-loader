@@ -43,6 +43,7 @@ var protocol_1 = require("./protocol");
 function createChecker(receive, send) {
     var projectVersion = 0;
     var loaderConfig;
+    var transformers;
     var compilerConfig;
     var compilerOptions;
     var webpackOptions;
@@ -231,10 +232,10 @@ function createChecker(receive, send) {
         });
         var program = service.getProgram();
         if (loaderConfig.getCustomTransformers !== undefined) {
-            host.getCustomTransformers = loaderConfig.getCustomTransformers(program);
+            transformers = host.getCustomTransformers = loaderConfig.getCustomTransformers(program);
         }
         else if (loaderConfig.customTranformersPath !== undefined) {
-            host.getCustomTransformers = require(loaderConfig.customTranformersPath)(program);
+            transformers = host.getCustomTransformers = require(loaderConfig.customTranformersPath)(program);
         }
         program.getSourceFiles().forEach(function (file) {
             files[file.fileName] = {
@@ -298,6 +299,7 @@ function createChecker(receive, send) {
         var trans = compiler.transpileModule(files[fileName].text, {
             compilerOptions: compilerOptions,
             fileName: fileName,
+            transformers: transformers,
             reportDiagnostics: false
         });
         return {
